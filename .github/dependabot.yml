@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Adapter modules under contrib/* will be added here as they ship.
+  # The core module has zero non-stdlib dependencies, so it has no entry.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
