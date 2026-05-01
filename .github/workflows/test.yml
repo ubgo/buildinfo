@@ -19,7 +19,7 @@ jobs:
           - .
           # contrib/* modules will be added here as they ship.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v5
         with:
@@ -46,7 +46,7 @@ jobs:
     name: zero-dep gate (core)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: assert core has no non-stdlib deps
         run: |
@@ -60,7 +60,7 @@ jobs:
     name: tidy check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v5
         with:
