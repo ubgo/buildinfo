@@ -92,7 +92,7 @@ Adapter modules ship as separate Go modules under `contrib/`. Import only the on
 | `buildinfo-zap` | `github.com/ubgo/buildinfo/contrib/buildinfo-zap` | Zap log fields |
 | `buildinfo-slog` | `github.com/ubgo/buildinfo/contrib/buildinfo-slog` | stdlib `slog` Attrs |
 
-(Adapters land incrementally as the core stabilises.)
+All eight adapters ship in v0.1.0. Each is a separate Go module under `contrib/<adapter>/` and pulls only its own dependencies.
 
 ## Compatibility
 

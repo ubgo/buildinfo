@@ -4,9 +4,16 @@ version: '3'
 # Run `task --list` to see all available tasks.
 
 vars:
-  CORE_MODULES: buildinfo
-  # CONTRIB_MODULES will list each contrib module once they exist, e.g.
-  # CONTRIB_MODULES: contrib/buildinfo-nethttp contrib/buildinfo-gin
+  CORE_MODULES: .
+  CONTRIB_MODULES: >-
+    contrib/buildinfo-nethttp
+    contrib/buildinfo-slog
+    contrib/buildinfo-zap
+    contrib/buildinfo-otel
+    contrib/buildinfo-gin
+    contrib/buildinfo-chi
+    contrib/buildinfo-echo
+    contrib/buildinfo-fiber
 
 tasks:
   default:
