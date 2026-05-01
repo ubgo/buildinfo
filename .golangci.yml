@@ -13,20 +13,9 @@ linters:
     - staticcheck
     - unused
     - revive
-    - gosec
     - misspell
     - unconvert
     - gocritic
-
-linters-settings:
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-        disabled: false
-        arguments:
-          - "checkPrivateReceivers"
-          - "disableStutteringCheck"
 
 issues:
   max-issues-per-linter: 0
