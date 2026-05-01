@@ -1,6 +1,33 @@
 # buildinfo-fiber
 
+> **Role: HTTP renderer.** This adapter reads `buildinfo.Get()` and exposes the result over HTTP. It does no I/O itself — see the [system diagram](https://github.com/ubgo/buildinfo#how-the-pieces-fit-together) for how all eight adapters consume the same Info struct.
+
 Fiber adapter for [`github.com/ubgo/buildinfo`](https://github.com/ubgo/buildinfo) — exposes build metadata via a `fiber.Handler` and a `Mount` helper that registers the route with optional middleware.
+
+## How it works
+
+```
+                       ┌──────────────────────────────────────┐
+                       │            YOUR SERVICE              │
+                       │                                      │
+   -ldflags ────→      │  buildinfo.Get() → Info{Version,     │
+   runtime/debug ──→   │                          Commit, …}  │
+                       │             │                        │
+                       │             ▼                        │
+                       │  ┌──────────────────┐                │
+                       │  │  buildinfo-fiber │ reads Info     │
+                       │  │  (HTTP RENDERER) │                │
+                       │  └────────┬─────────┘                │
+                       │           │ fiber.Handler            │
+                       │           ▼                          │
+                       │  ┌──────────────────┐                │
+                       │  │  fiber.App       │                │
+                       │  │   /version       │                │
+                       │  └────────┬─────────┘                │
+                       └───────────┼──────────────────────────┘
+                                   ▼
+                          curl / dashboards / k8s describe
+```
 
 ## Install
 

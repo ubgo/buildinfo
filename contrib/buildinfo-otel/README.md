@@ -1,6 +1,45 @@
 # buildinfo-otel
 
+> **Role: OTEL renderer.** This adapter reads `buildinfo.Get()` and returns OpenTelemetry attributes for use in a `resource.Resource`. It does no I/O — see the [system diagram](https://github.com/ubgo/buildinfo#how-the-pieces-fit-together) for how all eight adapters consume the same Info struct.
+
 OpenTelemetry adapter for [`github.com/ubgo/buildinfo`](https://github.com/ubgo/buildinfo) — exposes build metadata as `[]attribute.KeyValue` suitable for use in an OTEL `resource.Resource`.
+
+## How it works
+
+```
+                       ┌──────────────────────────────────────┐
+                       │            YOUR SERVICE              │
+                       │                                      │
+   -ldflags ────→      │  buildinfo.Get() → Info{Version, …}  │
+   runtime/debug ──→   │             │                        │
+                       │             ▼                        │
+                       │  ┌──────────────────┐                │
+                       │  │  buildinfo-otel  │                │
+                       │  │  (OTEL RENDERER) │                │
+                       │  │  Attributes() →  │                │
+                       │  │   []KeyValue     │                │
+                       │  │     build.version                 │
+                       │  │     build.commit                  │
+                       │  │     build.branch                  │
+                       │  │     build.time                    │
+                       │  │     build.go_version              │
+                       │  │     build.goos / goarch           │
+                       │  │     build.modified                │
+                       │  └────────┬─────────┘                │
+                       │           │                          │
+                       │           ▼                          │
+                       │  resource.New(ctx,                   │
+                       │      WithAttributes(svc.name…),      │
+                       │      WithAttributes(buildinfootel…)) │
+                       │           │                          │
+                       │           ▼                          │
+                       │  TracerProvider / MeterProvider      │
+                       └───────────┬──────────────────────────┘
+                                   ▼
+                       Every span + metric carries the build.*
+                       attributes → OTEL Collector / Jaeger /
+                       Tempo / vendor backend
+```
 
 ## Install
 

@@ -1,8 +1,40 @@
 # buildinfo-slog
 
+> **Role: Logger renderer.** This adapter reads `buildinfo.Get()` and returns logger fields ready to attach to your structured logger. It does no I/O — see the [system diagram](https://github.com/ubgo/buildinfo#how-the-pieces-fit-together) for how all eight adapters consume the same Info struct.
+
 Stdlib `log/slog` adapter for [`github.com/ubgo/buildinfo`](https://github.com/ubgo/buildinfo) — exposes build metadata as `[]slog.Attr` (flat) or as a single grouped `slog.Attr` (nested under a `build` group).
 
 Zero third-party dependencies. Standard library only.
+
+## How it works
+
+```
+                       ┌──────────────────────────────────────┐
+                       │            YOUR SERVICE              │
+                       │                                      │
+   -ldflags ────→      │  buildinfo.Get() → Info{Version, …}  │
+   runtime/debug ──→   │             │                        │
+                       │             ▼                        │
+                       │  ┌──────────────────┐                │
+                       │  │  buildinfo-slog  │                │
+                       │  │  (LOG RENDERER)  │                │
+                       │  │  Attrs() →       │                │
+                       │  │   []slog.Attr    │                │
+                       │  │  Group() →       │                │
+                       │  │   slog.Attr      │                │
+                       │  └────────┬─────────┘                │
+                       │           │                          │
+                       │           ▼                          │
+                       │  slog.Logger.With(Attrs()…)          │
+                       │           │                          │
+                       │           ▼                          │
+                       │  Every log line carries              │
+                       │  build_version, build_commit, …      │
+                       └───────────┬──────────────────────────┘
+                                   ▼
+                       Datadog / Loki / ELK / vendor log
+                       aggregator
+```
 
 ## Install
 

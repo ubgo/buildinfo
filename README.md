@@ -4,6 +4,46 @@ Build metadata for Go binaries — version, commit, build time, branch, Go versi
 
 Zero third-party dependencies in the core. HTTP, OTEL, Zap, and slog integrations live in separate adapter modules under `contrib/`.
 
+## How the pieces fit together
+
+`buildinfo` populates a single `Info` struct at process start from two sources, then every contrib **consumes** that struct and surfaces it somewhere — an HTTP route, OTEL resource attributes, Zap fields, slog attrs. There is no registry, no observer pattern, no async work; it's a build-time fact set, exposed many ways.
+
+```
+               ┌────────────────────────────────────────────────┐
+               │                YOUR SERVICE                    │
+               │                                                │
+   -ldflags ─→ │  ┌──────────────────────┐                      │
+   runtime    │  │   buildinfo.Get()    │  cached on first call │
+   /debug ─→  │  │   ↓                  │                       │
+               │  │   Info{Version,      │                       │
+               │  │     Commit,          │                       │
+               │  │     BuildTime,       │                       │
+               │  │     Branch,          │                       │
+               │  │     GoVersion,       │                       │
+               │  │     GOOS, GOARCH,    │                       │
+               │  │     Modified,        │                       │
+               │  │     Modules[]}       │                       │
+               │  └──────────┬───────────┘                       │
+               │             │                                   │
+               │             ├────────────────────┐              │
+               │             │                    │              │
+               │             ▼                    ▼              │
+               │  ┌──────────────────┐   ┌──────────────────┐    │
+               │  │ HTTP ADAPTERS    │   │ LOGGER + OTEL    │    │
+               │  │  buildinfo-      │   │  buildinfo-otel  │    │
+               │  │   nethttp / gin /│   │  buildinfo-zap   │    │
+               │  │   chi / echo /   │   │  buildinfo-slog  │    │
+               │  │   fiber          │   │                  │    │
+               │  └────────┬─────────┘   └────────┬─────────┘    │
+               │           │ /version JSON        │ Attrs/Fields │
+               └───────────┼──────────────────────┼──────────────┘
+                           ▼                      ▼
+                      curl / k8s          attached to every span,
+                      release dashboard    metric, and log line
+```
+
+Every adapter is read-only against `buildinfo.Info`. None of them perform any I/O on their own; they just make the same struct available in different output formats.
+
 ## Install
 
 ```sh

@@ -1,6 +1,33 @@
 # buildinfo-gin
 
+> **Role: HTTP renderer.** This adapter reads `buildinfo.Get()` and exposes the result over HTTP. It does no I/O itself — see the [system diagram](https://github.com/ubgo/buildinfo#how-the-pieces-fit-together) for how all eight adapters consume the same Info struct.
+
 Gin adapter for [`github.com/ubgo/buildinfo`](https://github.com/ubgo/buildinfo) — exposes build metadata via a `gin.HandlerFunc` and a `Mount` helper that registers the route with optional middleware.
+
+## How it works
+
+```
+                       ┌──────────────────────────────────────┐
+                       │            YOUR SERVICE              │
+                       │                                      │
+   -ldflags ────→      │  buildinfo.Get() → Info{Version,     │
+   runtime/debug ──→   │                          Commit, …}  │
+                       │             │                        │
+                       │             ▼                        │
+                       │  ┌──────────────────┐                │
+                       │  │  buildinfo-gin   │ reads Info     │
+                       │  │  (HTTP RENDERER) │                │
+                       │  └────────┬─────────┘                │
+                       │           │ gin.HandlerFunc          │
+                       │           ▼                          │
+                       │  ┌──────────────────┐                │
+                       │  │  gin.Engine      │                │
+                       │  │   /version       │                │
+                       │  └────────┬─────────┘                │
+                       └───────────┼──────────────────────────┘
+                                   ▼
+                          curl / dashboards / k8s describe
+```
 
 ## Install
 

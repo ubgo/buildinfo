@@ -1,8 +1,35 @@
 # buildinfo-nethttp
 
+> **Role: HTTP renderer.** This adapter reads `buildinfo.Get()` and exposes the result over HTTP. It does no I/O itself — see the [system diagram](https://github.com/ubgo/buildinfo#how-the-pieces-fit-together) for how all eight adapters consume the same Info struct.
+
 Stdlib `net/http` adapter for [`github.com/ubgo/buildinfo`](https://github.com/ubgo/buildinfo) — exposes build metadata via an `http.Handler` and a `Mount` helper that registers the route with optional middleware.
 
 Zero third-party dependencies. Standard library only.
+
+## How it works
+
+```
+                       ┌──────────────────────────────────────┐
+                       │            YOUR SERVICE              │
+                       │                                      │
+   -ldflags ────→      │  buildinfo.Get() → Info{Version,     │
+   runtime/debug ──→   │                          Commit, …}  │
+                       │             │                        │
+                       │             ▼                        │
+                       │  ┌──────────────────┐                │
+                       │  │ buildinfo-nethttp│ reads Info     │
+                       │  │  (HTTP RENDERER) │                │
+                       │  └────────┬─────────┘                │
+                       │           │ http.Handler             │
+                       │           ▼                          │
+                       │  ┌──────────────────┐                │
+                       │  │ http.ServeMux    │                │
+                       │  │   /version       │                │
+                       │  └────────┬─────────┘                │
+                       └───────────┼──────────────────────────┘
+                                   ▼
+                          curl / dashboards / k8s describe
+```
 
 ## Install
 
