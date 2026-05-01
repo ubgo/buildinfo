@@ -26,9 +26,9 @@ jobs:
           - contrib/buildinfo-echo
           - contrib/buildinfo-fiber
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.24"
           cache: true
@@ -47,7 +47,7 @@ jobs:
         run: echo "name=cover-$(echo '${{ matrix.module }}' | tr '/' '-')" >> "$GITHUB_OUTPUT"
 
       - name: upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: ${{ matrix.module }}/cover.out
@@ -57,7 +57,7 @@ jobs:
     name: zero-dep gate (core)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: assert core has no non-stdlib deps
         run: |
@@ -71,9 +71,9 @@ jobs:
     name: tidy check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.24"
 
