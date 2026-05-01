@@ -83,14 +83,16 @@ Adapter modules ship as separate Go modules under `contrib/`. Import only the on
 
 | Adapter | Module path | Purpose |
 |---------|-------------|---------|
-| `buildinfo-nethttp` | `github.com/ubgo/buildinfo/contrib/buildinfo-nethttp` | stdlib `/version` handler |
-| `buildinfo-gin` | `github.com/ubgo/buildinfo/contrib/buildinfo-gin` | Gin `/version` handler |
-| `buildinfo-chi` | `github.com/ubgo/buildinfo/contrib/buildinfo-chi` | Chi `/version` Mount helper |
-| `buildinfo-echo` | `github.com/ubgo/buildinfo/contrib/buildinfo-echo` | Echo `/version` handler |
-| `buildinfo-fiber` | `github.com/ubgo/buildinfo/contrib/buildinfo-fiber` | Fiber `/version` handler |
-| `buildinfo-otel` | `github.com/ubgo/buildinfo/contrib/buildinfo-otel` | OpenTelemetry resource attributes |
-| `buildinfo-zap` | `github.com/ubgo/buildinfo/contrib/buildinfo-zap` | Zap log fields |
-| `buildinfo-slog` | `github.com/ubgo/buildinfo/contrib/buildinfo-slog` | stdlib `slog` Attrs |
+| [`buildinfo-nethttp`](./contrib/buildinfo-nethttp) | `github.com/ubgo/buildinfo/contrib/buildinfo-nethttp` | stdlib `/version` handler + Mount |
+| [`buildinfo-gin`](./contrib/buildinfo-gin) | `github.com/ubgo/buildinfo/contrib/buildinfo-gin` | Gin `/version` handler + Mount |
+| [`buildinfo-chi`](./contrib/buildinfo-chi) | `github.com/ubgo/buildinfo/contrib/buildinfo-chi` | Chi `/version` Mount helper |
+| [`buildinfo-echo`](./contrib/buildinfo-echo) | `github.com/ubgo/buildinfo/contrib/buildinfo-echo` | Echo `/version` handler + Mount |
+| [`buildinfo-fiber`](./contrib/buildinfo-fiber) | `github.com/ubgo/buildinfo/contrib/buildinfo-fiber` | Fiber `/version` handler + Mount |
+| [`buildinfo-otel`](./contrib/buildinfo-otel) | `github.com/ubgo/buildinfo/contrib/buildinfo-otel` | OpenTelemetry resource attributes |
+| [`buildinfo-zap`](./contrib/buildinfo-zap) | `github.com/ubgo/buildinfo/contrib/buildinfo-zap` | Zap log fields (`Fields` + `Namespace`) |
+| [`buildinfo-slog`](./contrib/buildinfo-slog) | `github.com/ubgo/buildinfo/contrib/buildinfo-slog` | stdlib `slog` Attrs (`Attrs` + `Group`) |
+
+Click any adapter for its dedicated README with install, quick start, middleware, and API tables.
 
 All eight adapters ship in v0.1.0. Each is a separate Go module under `contrib/<adapter>/` and pulls only its own dependencies.
 
