@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/ubgo/buildinfo v0.0.0
+	github.com/ubgo/buildinfo v0.1.0
 )
 
 require (
@@ -37,5 +37,3 @@ require (
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/ubgo/buildinfo => ../..

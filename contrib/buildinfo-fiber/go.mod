@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.5
-	github.com/ubgo/buildinfo v0.0.0
+	github.com/ubgo/buildinfo v0.1.0
 )
 
 require (
@@ -20,5 +20,3 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 )
-
-replace github.com/ubgo/buildinfo => ../..

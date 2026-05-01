@@ -1,4 +1,2 @@
-github.com/go-chi/chi/v5 v5.1.0 h1:acVI1TYaD+hhedDJ3r54HyA6sExp3HfXq7QWEEY/xMw=
-github.com/go-chi/chi/v5 v5.1.0/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
 github.com/ubgo/buildinfo v0.1.0 h1:QKfO8uTXEad6SFcEAxM+p5jAF9FmqqycdWKDBB3XQ6M=
 github.com/ubgo/buildinfo v0.1.0/go.mod h1:Hhx1hS14aH3Dw4QoKq5J9DYG5J1l6fGHYmIIwQJvT1U=
