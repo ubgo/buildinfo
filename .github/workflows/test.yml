@@ -42,10 +42,14 @@ jobs:
         working-directory: ${{ matrix.module }}
         run: go test -race -coverprofile=cover.out ./...
 
+      - name: sanitise module path for artifact name
+        id: artifact
+        run: echo "name=cover-$(echo '${{ matrix.module }}' | tr '/' '-')" >> "$GITHUB_OUTPUT"
+
       - name: upload coverage
         uses: actions/upload-artifact@v4
         with:
-          name: cover-${{ matrix.module }}
+          name: ${{ steps.artifact.outputs.name }}
           path: ${{ matrix.module }}/cover.out
           if-no-files-found: ignore
 
@@ -76,7 +80,8 @@ jobs:
       - name: assert go.mod / go.sum are tidy
         run: |
           go mod tidy
-          if ! git diff --exit-code go.mod go.sum 2>/dev/null; then
+          if [ -n "$(git status --porcelain go.mod go.sum 2>/dev/null)" ]; then
             echo "go.mod or go.sum drifted — run 'go mod tidy'"
+            git diff -- go.mod go.sum 2>/dev/null || true
             exit 1
           fi
