@@ -117,6 +117,65 @@ b, _ := info.JSON()
 | `Modified` | `vcs.modified` | `false` |
 | `Modules` | `runtime/debug.BuildInfo.Deps` | empty slice |
 
+## Why not just `runtime/debug.ReadBuildInfo` directly?
+
+`runtime/debug.ReadBuildInfo()` gives you a `*debug.BuildInfo` with `Main.Version`, `Settings` (a slice of key-value pairs you have to scan), and `Deps` — accurate, but inconvenient. Every project that exposes build metadata ends up writing the same parsing layer.
+
+`buildinfo` is that layer, plus three things stdlib doesn't give you:
+
+| | stdlib | buildinfo |
+|---|---|---|
+| Read VCS commit / time / dirty flag | scan `Settings []KeyValue` for `vcs.revision` / `vcs.time` / `vcs.modified` | already extracted into `Info.Commit` / `BuildTime` / `Modified` |
+| `Branch` field | not available — Go doesn't capture the current branch | populated via `-ldflags` |
+| `-ldflags` overrides for CI-stamped versions | DIY | `-X github.com/ubgo/buildinfo.Version=…` works out of the box |
+| JSON / map output | DIY | `info.JSON()`, `buildinfo.Map()` |
+| HTTP / OTEL / Zap / slog plumbing | DIY for each | one contrib import per integration |
+
+If you only need version + commit and don't mind the boilerplate, stdlib is fine. If you're going to expose `/version`, attach build attrs to OTEL resources, *and* tag log lines, the per-place plumbing adds up — that's the value of contribs.
+
+## Composing multiple adapters
+
+The `Info` struct is read-only and the same value across every contrib. Use as many as you need without coordination:
+
+```go
+import (
+    "log/slog"
+    "net/http"
+    "os"
+
+    binethttp "github.com/ubgo/buildinfo/contrib/buildinfo-nethttp"
+    biotel    "github.com/ubgo/buildinfo/contrib/buildinfo-otel"
+    bislog    "github.com/ubgo/buildinfo/contrib/buildinfo-slog"
+
+    sdkresource "go.opentelemetry.io/otel/sdk/resource"
+    sdktrace    "go.opentelemetry.io/otel/sdk/trace"
+)
+
+func main() {
+    // 1. Expose /version via HTTP.
+    mux := http.NewServeMux()
+    binethttp.Mount(mux)
+
+    // 2. Tag every slog line with a "build" group.
+    logger := slog.New(slog.NewJSONHandler(os.Stdout, nil)).
+        With(bislog.Group())
+    slog.SetDefault(logger)
+
+    // 3. Attach build metadata as OpenTelemetry resource attributes,
+    //    so every span / metric carries it.
+    res, _ := sdkresource.Merge(
+        sdkresource.Default(),
+        sdkresource.NewSchemaless(biotel.Attrs()...),
+    )
+    tp := sdktrace.NewTracerProvider(sdktrace.WithResource(res))
+    _ = tp // wire to global TracerProvider, etc.
+
+    _ = http.ListenAndServe(":8080", mux)
+}
+```
+
+`buildinfo.Get()` is called once on first access and cached — composing N adapters does not multiply the cost.
+
 ## Adapters
 
 Adapter modules ship as separate Go modules under `contrib/`. Import only the ones you use; each pulls in its own dependencies.
@@ -135,6 +194,19 @@ Adapter modules ship as separate Go modules under `contrib/`. Import only the on
 Click any adapter for its dedicated README with install, quick start, middleware, and API tables.
 
 All eight adapters ship in v0.1.0. Each is a separate Go module under `contrib/<adapter>/` and pulls only its own dependencies.
+
+## Comparison
+
+| Feature | stdlib `runtime/debug` | `carlmjohnson/versioninfo` | **`ubgo/buildinfo`** |
+|---|:---:|:---:|:---:|
+| Reads `vcs.revision` / `vcs.time` / `vcs.modified` | manual scan of `Settings` | ✅ | **✅ (extracted to typed fields)** |
+| `Branch` field via `-ldflags` | ❌ | ❌ | **✅** |
+| Cached `Get()` (read once at boot) | ❌ — re-parses each call | ✅ | **✅** |
+| HTTP `/version` adapters | ❌ | ❌ | **✅ (5 frameworks)** |
+| OpenTelemetry resource attributes | ❌ | ❌ | **✅** |
+| Zap / slog field helpers | ❌ | ❌ | **✅** |
+| Module list (SBOM-friendly) | ✅ (`Deps`) | ❌ | **✅** |
+| Zero-dep core | ✅ | ✅ | **✅** |
 
 ## Compatibility
 
